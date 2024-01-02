@@ -10,14 +10,17 @@
   },
   "dependencies": {
     "crawlee": "^3.7.0",
+    "crypto-js": "^4.2.0",
     "glob": "^10.3.10",
     "gpt-tokenizer": "^2.1.2",
     "next": "14.0.4",
     "playwright": "^1.40.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
