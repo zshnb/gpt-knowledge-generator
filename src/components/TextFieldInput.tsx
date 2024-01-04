@@ -8,6 +8,7 @@ export default function TextFieldInput() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [uuid, setUuid] = useState('')
+  const [download, setDownload] = useState(false)
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined = undefined
@@ -18,18 +19,8 @@ export default function TextFieldInput() {
         }).then(async res => {
           const json = await res.json()
           if (json.data === 'finished') {
-            const downloadResponse = await fetch(`http://localhost:5001/query/${uuid}/download`, {
-              method: 'get'
-            })
-            const blob = await downloadResponse.blob()
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `${url}.json`; // 指定下载文件名
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
+            setDownload(true)
+            clearInterval(interval)
           }
         })
       }, 2000)
@@ -38,6 +29,29 @@ export default function TextFieldInput() {
       clearInterval(interval)
     }
   }, [uuid])
+
+  useEffect(() => {
+    if (download) {
+      fetch(`http://localhost:5001/query/${uuid}/download`, {
+        method: 'get'
+      }).then(res => res.blob())
+        .then(blob => {
+          const href = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = href;
+          a.download = `${url}.json`; // 指定下载文件名
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(href);
+        })
+        .catch(() => {
+          setUuid('')
+          setLoading(false)
+          setDownload(false)
+        })
+    }
+  }, [download]);
   return (
     <div className="flex items-center bg-white rounded-[20px]">
       <input
