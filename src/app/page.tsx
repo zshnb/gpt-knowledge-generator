@@ -23,7 +23,7 @@ export default function Home() {
             setDownload(true)
             clearInterval(interval)
           }
-        })
+        }).catch(() => clearInterval(interval))
       }, 2000)
     }
     return () => {
@@ -35,7 +35,13 @@ export default function Home() {
     if (download) {
       fetch(`http://localhost:5001/query/${uuid}/download`, {
         method: 'get'
-      }).then(res => res.blob())
+      }).then(res => {
+        if (res.ok) {
+          return res.blob()
+        } else {
+          return Promise.reject('download api is not ok')
+        }
+      })
         .then(blob => {
           const href = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -45,6 +51,9 @@ export default function Home() {
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(href);
+        })
+        .catch(err => {
+          console.log('download error', err)
         })
         .finally(() => {
           setUuid('')
@@ -87,24 +96,27 @@ export default function Home() {
             {loading ? '生成中' : '生成'}
           </button>
         </div>
-        <Toggle className='self-start' onChange={(value) => {
-          setShowAdvancedSetting(value)
-        }}/>
-        {
-          showAdvancedSetting && (
-            <div className='flex self-start'>
-              <div>
-                <input
-                  type="number"
-                  placeholder="最大爬取页数"
-                  className="input input-primary w-full max-w-xs focus:outline-0 focus:border-[#087EA2] border-[#087EA2]"
-                  value={maxPageCount}
-                  onChange={(e) => setMaxPageCount(Number(e.target.value))}
-                />
+        <div className='self-start'>
+          <p className='text-xl'>高级设置</p>
+          <Toggle className='self-start' onChange={(value) => {
+            setShowAdvancedSetting(value)
+          }}/>
+          {
+            showAdvancedSetting && (
+              <div className='flex self-start'>
+                <div>
+                  <input
+                    type="number"
+                    placeholder="最大爬取页数"
+                    className="input input-primary w-full max-w-xs focus:outline-0 focus:border-[#087EA2] border-[#087EA2]"
+                    value={maxPageCount}
+                    onChange={(e) => setMaxPageCount(Number(e.target.value))}
+                  />
+                </div>
               </div>
-            </div>
-          )
-        }
+            )
+          }
+        </div>
       </div>
     </main>
   )
